@@ -3,6 +3,7 @@ package com.example.autotextapp;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.TextView;
 
@@ -10,6 +11,7 @@ public class MainActivity extends AppCompatActivity {
 
     CalendarView mainCalendar;
     TextView selectedDate;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,5 +27,7 @@ public class MainActivity extends AppCompatActivity {
             selectedDate.setText(date);
             }
         });
+
+
     }
 }
