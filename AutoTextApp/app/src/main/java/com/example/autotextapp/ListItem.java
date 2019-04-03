@@ -8,8 +8,8 @@ import java.util.Date;
 public class ListItem {
     public String contactName;
     public Bitmap messengerIcon;
-    public Date messageSendDate;
-    public Time sendTime;
+    public String messageSendDate;
+    public String sendTime;
     public String message;
 
 
