@@ -1,6 +1,6 @@
 package com.example.autotextapp;
 
-import android.R;
+
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
