@@ -1,5 +1,6 @@
 package com.example.autotextapp;
 
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
@@ -9,12 +10,14 @@ import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.database.sqlite.SQLiteDatabase;
 
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         List<ListItem> list = new ArrayList<ListItem>();
+
+
 
         ListItem item1 = new ListItem();
         item1.contactName = "Robert";
