@@ -27,15 +27,19 @@ public class MainActivity extends AppCompatActivity {
     CalendarView mainCalendar;
     TextView selectedDate;
     String date;
-
+    List<ListItem> list = new ArrayList<ListItem>();
+    SQLiteDatabase db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Bitmap defaultImage;
+        String path="/data/data/"+getPackageName()+"/sample.db";
 
-        defaultImage = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+
+        db= SQLiteDatabase.openOrCreateDatabase(path,null);
+        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,message TEXT,contact TEXT,platform TEXT, date TEXT, time TEXT);";
+        db.execSQL(sql);
 
         mainCalendar = (CalendarView) findViewById(R.id.calendarView);
         selectedDate = (TextView) findViewById((R.id.currentDate));
@@ -44,29 +48,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 date = (month + 1) + "/" + dayOfMonth + "/" + year;
+                //PopulateList(db);
             selectedDate.setText(date);
+
             }
         });
-
-        List<ListItem> list = new ArrayList<ListItem>();
-
-
-
-        ListItem item1 = new ListItem();
-        item1.contactName = "Robert";
-        item1.messengerIcon = defaultImage;
-        item1.messageSendDate = "4/2/2019";
-        item1.sendTime = "5:00 pm";
-        item1.message= "hi";
-        list.add(item1);
-
-        ListItem item2 = new ListItem();
-        item2.contactName = "Nebile";
-        item2.messengerIcon = defaultImage;
-        item2.messageSendDate = "4/2/2019";
-        item2.sendTime = "7:00 pm";
-        item2.message= "helloooo";
-        list.add(item2);
 
         ListItemAdapter adapter;
         adapter = new ListItemAdapter(this, 0, list);
@@ -75,36 +61,48 @@ public class MainActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
 
         //set the path and database name
-        String path="/data/data/"+getPackageName()+"/sample.db";
 
-        SQLiteDatabase db;
-        db= SQLiteDatabase.openOrCreateDatabase(path,null);
-        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,message TEXT,contact TEXT,platform TEXT, startdate TEXT,enddate TEXT, starttime TEXT, endtime TEXT );";
-        db.execSQL(sql);
 
         ContentValues values= new ContentValues();
         values.put("name","Bruce");
         values.put("message","hey");
         values.put("contact","bobby");
         values.put("platform","SMS");
-        values.put("startdate","4/8/19");
-        values.put("enddate","4/8/19");
-        values.put("starttime","8:00 am");
-        values.put("endtime","9:00 pm");
-
+        values.put("date","4/8/19");
+        values.put("time","8:00 am");
         db.insert("info",null,values);
+
         ContentValues value2= new ContentValues();
         value2.put("name","Bobby");
         value2.put("message","Hi there me friend");
         value2.put("contact","Jeff");
         value2.put("platform","FB");
-        value2.put("startdate","4/15/19");
-        value2.put("enddate","4/16/19");
-        value2.put("starttime","8:00 am");
-        value2.put("endtime","12:00 pm");
+        value2.put("date","4/15/19");
+        value2.put("time","8:00 am");
         db.insert("info",null,value2);
 
-        db.rawQuery("SELECT * FROM  info  WHERE date" = "'"+date+"'", null);
+
 
     }
+
+    public Cursor GetItemsOnDate(SQLiteDatabase db){
+        return db.rawQuery("SELECT * FROM  info  WHERE date =" + "'"+date+"'", null);
+    }
+
+    public void PopulateList(SQLiteDatabase db){
+        list.clear();
+        Cursor iter = GetItemsOnDate(db);
+
+        while(iter.moveToNext()){
+            ListItem nextItem = new ListItem();
+            nextItem.contactName = iter.getString(0);
+            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+            nextItem.messageSendDate = iter.getString(4);
+            nextItem.sendTime = iter.getString(5);
+            nextItem.message = iter.getString(1);
+
+            list.add(nextItem);
+        }
+    }
 }
+
