@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     CalendarView mainCalendar;
     TextView selectedDate;
+    String date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         mainCalendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
-            String date = (month + 1) + "/" + dayOfMonth + "/" + year;
+                date = (month + 1) + "/" + dayOfMonth + "/" + year;
             selectedDate.setText(date);
             }
         });
@@ -102,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
         value2.put("starttime","8:00 am");
         value2.put("endtime","12:00 pm");
         db.insert("info",null,value2);
+
+        db.rawQuery("SELECT * FROM  info  WHERE date" = "'"+date+"'", null);
 
     }
 }
