@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     String date;
     List<ListItem> list = new ArrayList<ListItem>();
     SQLiteDatabase db;
+    ListItemAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ListItemAdapter adapter;
+
         adapter = new ListItemAdapter(this, 0, list);
         // Assign ListItemAdapter to ListView
         ListView listView = (ListView)findViewById(R.id.EventList);
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             nextItem.message = iter.getString(1);
 
             list.add(nextItem);
-            System.out.print(nextItem.toString());
+            adapter = new ListItemAdapter(this, 0, list);
         }
     }
 }
