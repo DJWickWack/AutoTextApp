@@ -9,6 +9,7 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.ListView;
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 date = (month + 1) + "/" + dayOfMonth + "/" + year;
-                //PopulateList(db);
+                PopulateList(db);
             selectedDate.setText(date);
 
             }
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         values.put("message","hey");
         values.put("contact","bobby");
         values.put("platform","SMS");
-        values.put("date","4/8/19");
+        values.put("date","4/8/2019");
         values.put("time","8:00 am");
         db.insert("info",null,values);
 
@@ -103,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
             nextItem.message = iter.getString(1);
 
             list.add(nextItem);
+            Log.d("Tag", list.get(0).toString());
             adapter = new ListItemAdapter(this, 0, list);
         }
     }
