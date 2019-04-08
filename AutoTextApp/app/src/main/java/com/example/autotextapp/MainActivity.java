@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             nextItem.message = iter.getString(1);
 
             list.add(nextItem);
+            System.out.print(nextItem.toString());
         }
     }
 }

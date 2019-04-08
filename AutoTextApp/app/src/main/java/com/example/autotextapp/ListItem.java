@@ -12,6 +12,8 @@ public class ListItem {
     public String sendTime;
     public String message;
 
-
-
+public String toString(){
+    return "Contact Name: " + this.contactName + "Message Send Date: " + this.messageSendDate +
+            "Send Time: " + this.sendTime + "Message: " + this.message;
+    }
 }
