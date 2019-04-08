@@ -9,7 +9,6 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.ListView;
@@ -30,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     String date;
     List<ListItem> list = new ArrayList<ListItem>();
     SQLiteDatabase db;
+    ListItemAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,13 +49,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 date = (month + 1) + "/" + dayOfMonth + "/" + year;
-                PopulateList(db);
+                //PopulateList(db);
             selectedDate.setText(date);
 
             }
         });
 
-        ListItemAdapter adapter;
+
         adapter = new ListItemAdapter(this, 0, list);
         // Assign ListItemAdapter to ListView
         ListView listView = (ListView)findViewById(R.id.EventList);
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         value2.put("message","Hi there me friend");
         value2.put("contact","Jeff");
         value2.put("platform","FB");
-        value2.put("date","4/15/2019");
+        value2.put("date","4/15/19");
         value2.put("time","8:00 am");
         db.insert("info",null,value2);
 
@@ -93,25 +93,17 @@ public class MainActivity extends AppCompatActivity {
     public void PopulateList(SQLiteDatabase db){
         list.clear();
         Cursor iter = GetItemsOnDate(db);
-        Log.d("Tag", "Gets to 1");
 
         while(iter.moveToNext()){
-            Log.d("Tag", "Gets to 2");
             ListItem nextItem = new ListItem();
-            Log.d("Tag", "Gets to 3");
             nextItem.contactName = iter.getString(0);
-            Log.d("Tag", "Gets to 4");
             nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            Log.d("Tag", "Gets to 5");
             nextItem.messageSendDate = iter.getString(4);
-            Log.d("Tag", "Gets to 6");
             nextItem.sendTime = iter.getString(5);
-            Log.d("Tag", "Gets to 7");
             nextItem.message = iter.getString(1);
-            Log.d("Tag", "Gets to 8");
 
             list.add(nextItem);
-            Log.d("Tag",nextItem.toString());
+            adapter = new ListItemAdapter(this, 0, list);
         }
     }
 }
