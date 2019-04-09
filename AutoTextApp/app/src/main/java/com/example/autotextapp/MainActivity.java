@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     List<ListItem> list = new ArrayList<ListItem>();
     SQLiteDatabase db;
     ListItemAdapter adapter;
+    ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,10 +58,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        adapter = new ListItemAdapter(this, 0, list);
+        //adapter = new ListItemAdapter(this, 0, list);
+
         // Assign ListItemAdapter to ListView
-        ListView listView = (ListView)findViewById(R.id.EventList);
-        listView.setAdapter(adapter);
+        listView = (ListView)findViewById(R.id.EventList);
+
 
         //set the path and database name
 
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         value2.put("message","Hi there me friend");
         value2.put("contact","Jeff");
         value2.put("platform","FB");
-        value2.put("date","4/15/19");
+        value2.put("date","4/15/2019");
         value2.put("time","8:00 am");
         db.insert("info",null,value2);
 
@@ -97,16 +99,18 @@ public class MainActivity extends AppCompatActivity {
 
         while(iter.moveToNext()){
             ListItem nextItem = new ListItem();
-            nextItem.contactName = iter.getString(0);
+            nextItem.contactName = iter.getString(3);
             nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = iter.getString(4);
-            nextItem.sendTime = iter.getString(5);
-            nextItem.message = iter.getString(1);
+            nextItem.messageSendDate = iter.getString(5);
+            nextItem.sendTime = iter.getString(6);
+            nextItem.message = iter.getString(2);
 
             list.add(nextItem);
             Log.d("Tag", list.get(0).toString());
             adapter = new ListItemAdapter(this, 0, list);
         }
+
+        listView.setAdapter(adapter);
     }
 }
 
