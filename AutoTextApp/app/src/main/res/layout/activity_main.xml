@@ -46,4 +46,17 @@
 
     </ListView>
 
+    <Button
+        android:id="@+id/AddEvent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorAccent"
+        android:text="+"
+        android:textSize="30dp"
+        android:textAlignment="center"
+        android:layout_toEndOf="@id/calendarHolder"
+        android:paddingLeft="10dp"
+        android:onClick="AddEvent"/>
+
+
 </RelativeLayout>
