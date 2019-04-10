@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         mainCalendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
-                date = (month + 1) + "/" + dayOfMonth + "/" + year;
+                date = (month + 1) + "-" + dayOfMonth + "-" + year;
                 PopulateList(db);
             selectedDate.setText(date);
 
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         //set the path and database name
 
 
-        ContentValues values= new ContentValues();
+        /*ContentValues values= new ContentValues();
         values.put("name","Bruce");
         values.put("message","hey");
         values.put("contact","bobby");
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         value2.put("date","4/15/2019");
         value2.put("time","8:00 am");
         db.insert("info",null,value2);
-
+        */
 
 
     }
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void AddEvent(View view){
-        Intent intent = new Intent(this, Event.class);
+        Intent intent = new Intent(MainActivity.this, AddEvent.class);
         startActivity(intent);
     }
 }
