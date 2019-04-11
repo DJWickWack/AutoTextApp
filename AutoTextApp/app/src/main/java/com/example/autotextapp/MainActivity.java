@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     SQLiteDatabase db;
     ListItemAdapter adapter;
     ListView listView;
+    int dayOfWeek;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,18 +43,52 @@ public class MainActivity extends AppCompatActivity {
         String path="/data/data/"+getPackageName()+"/sample.db";
 
 
-        db= SQLiteDatabase.openOrCreateDatabase(path,null);
-        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,message TEXT,contact TEXT,platform TEXT, date TEXT, time TEXT);";
-        db.execSQL(sql);
 
+        db= SQLiteDatabase.openOrCreateDatabase(path,null);
+        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,message TEXT,contact TEXT,platform TEXT, date TEXT, time TEXT, recurrsionPattern TEXT, weekDay int);";
+        db.execSQL(sql);
+        ContentValues value2= new ContentValues();
+        value2.put("name","test");
+        value2.put("message","hi");
+        value2.put("contact","Jeff");
+        value2.put("platform","FB");
+        value2.put("date", "04-11-2019");
+        value2.put("time", "16:35");
+        value2.put("recurrsionPattern", "Never");
+        value2.put("dayOfWeek", 5);
+
+
+        db.insert("info",null, value2);
+
+        db.close();Log.d("Tag1", "Test");
         mainCalendar = (CalendarView) findViewById(R.id.calendarView);
         selectedDate = (TextView) findViewById((R.id.currentDate));
 
         mainCalendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
-                date = (month + 1) + "-" + dayOfMonth + "-" + year;
+                Log.d("Tag1", "Test");
+                if (month+1 <10){
+                    if (dayOfMonth <10){
+                        date = "0" + (month + 1) + "-0" + dayOfMonth + "-" + year;
+                    }
+                    else {
+                        date = "0" + (month + 1) + "-" + dayOfMonth + "-" + year;
+                    }
+                }
+                else {
+                    if (dayOfMonth <10){
+                        date = (month + 1) + "-0" + dayOfMonth + "-" + year;
+                    }
+                    else {
+                        date = (month + 1) + "-" + dayOfMonth + "-" + year;
+                    }
+                }
+
+                dayOfWeek = (dayOfMonth + month + year + (year/4) +(year/100)+1)%7;
+                Log.d("Tag1", "Test");
                 PopulateList(db);
+                Log.d("Tag1", "Test");
             selectedDate.setText(date);
 
             }
@@ -65,40 +100,43 @@ public class MainActivity extends AppCompatActivity {
         // Assign ListItemAdapter to ListView
         listView = (ListView)findViewById(R.id.EventList);
 
-
-        //set the path and database name
-
-
-        /*ContentValues values= new ContentValues();
-        values.put("name","Bruce");
-        values.put("message","hey");
-        values.put("contact","bobby");
-        values.put("platform","SMS");
-        values.put("date","4/8/2019");
-        values.put("time","8:00 am");
-        db.insert("info",null,values);
-
-        ContentValues value2= new ContentValues();
-        value2.put("name","Bobby");
-        value2.put("message","Hi there me friend");
-        value2.put("contact","Jeff");
-        value2.put("platform","FB");
-        value2.put("date","4/15/2019");
-        value2.put("time","8:00 am");
-        db.insert("info",null,value2);
-        */
-
-
     }
 
     public Cursor GetItemsOnDate(SQLiteDatabase db){
         return db.rawQuery("SELECT * FROM  info  WHERE date =" + "'"+date+"'", null);
     }
 
+    public Cursor GetReccurringDailyEvents(SQLiteDatabase db) {
+        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Daily'", null);
+    }
+
+    public Cursor GetReccurringWeeklyEvents(SQLiteDatabase db) {
+        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Weekly' AND weekDay =" + dayOfWeek, null);
+    }
+
+    public Cursor GetReccurringMonthlyEvents(SQLiteDatabase db) {
+        String day = date.substring(3,5);
+        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Monthly'"+ "AND date LIKE" + "'%"+day+"%'", null);
+    }
+
+    public Cursor GetReccurringYearlyEvents(SQLiteDatabase db) {
+        String day = date.substring(0,5);
+        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Yearly'"+ "AND date LIKE" +"'" +day+"%'", null);
+    }
+
     public void PopulateList(SQLiteDatabase db){
         list.clear();
+        Log.d("Tag1", "Here");
         Cursor iter = GetItemsOnDate(db);
-
+        Log.d("Tag1", "H");
+        /*Cursor dailyRecurIter = GetReccurringDailyEvents(db);
+        Log.d("Tag1", "E");
+        Cursor weeklyRecurIter = GetReccurringWeeklyEvents(db);
+        Log.d("Tag1", "R");
+        Cursor monthlyRecurIter = GetReccurringMonthlyEvents(db);
+        Log.d("Tag1", "E");
+        Cursor yearlyRecurIter = GetReccurringYearlyEvents(db);
+        Log.d("Tag1", "Q");*/
         while(iter.moveToNext()){
             ListItem nextItem = new ListItem();
             nextItem.contactName = iter.getString(3);
@@ -109,9 +147,57 @@ public class MainActivity extends AppCompatActivity {
 
             list.add(nextItem);
             Log.d("Tag", list.get(0).toString());
-            adapter = new ListItemAdapter(this, 0, list);
+
+        }
+        /*while(dailyRecurIter.moveToNext()){
+            ListItem nextItem = new ListItem();
+            nextItem.contactName = dailyRecurIter.getString(3);
+            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+            nextItem.messageSendDate = dailyRecurIter.getString(5);
+            nextItem.sendTime = dailyRecurIter.getString(6);
+            nextItem.message = dailyRecurIter.getString(2);
+
+            list.add(nextItem);
+            Log.d("Tag", list.get(0).toString());
         }
 
+        while(weeklyRecurIter.moveToNext()){
+            ListItem nextItem = new ListItem();
+            nextItem.contactName = weeklyRecurIter.getString(3);
+            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+            nextItem.messageSendDate = weeklyRecurIter.getString(5);
+            nextItem.sendTime = weeklyRecurIter.getString(6);
+            nextItem.message = weeklyRecurIter.getString(2);
+
+            list.add(nextItem);
+            Log.d("Tag", list.get(0).toString());
+        }
+
+        while(monthlyRecurIter.moveToNext()){
+            ListItem nextItem = new ListItem();
+            nextItem.contactName = monthlyRecurIter.getString(3);
+            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+            nextItem.messageSendDate = monthlyRecurIter.getString(5);
+            nextItem.sendTime = monthlyRecurIter.getString(6);
+            nextItem.message = monthlyRecurIter.getString(2);
+
+            list.add(nextItem);
+            Log.d("Tag", list.get(0).toString());
+        }
+
+        while(yearlyRecurIter.moveToNext()){
+            ListItem nextItem = new ListItem();
+            nextItem.contactName = yearlyRecurIter.getString(3);
+            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+            nextItem.messageSendDate = yearlyRecurIter.getString(5);
+            nextItem.sendTime = yearlyRecurIter.getString(6);
+            nextItem.message = yearlyRecurIter.getString(2);
+
+            list.add(nextItem);
+            Log.d("Tag", list.get(0).toString());
+        }*/
+
+        adapter = new ListItemAdapter(this, 0, list);
         listView.setAdapter(adapter);
     }
 

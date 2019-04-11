@@ -31,7 +31,7 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
     EditText txtEventName, txtMessage, txtDate, txtTime;
     Switch notifyOnSend;
     public String repeatText, eventName, platform;
-    private int mYear, mMonth, mDay, mHour, mMinute;
+    private int mYear, mMonth, mDay, mHour, mMinute, dayOfWeek;
     public boolean notifyOn = false;
 
 
@@ -43,8 +43,7 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
         setContentView(R.layout.activity_add_event);
 
         //set the path and database name
-       String path="/data/data/"+getPackageName()+"/sample.db";
-
+        String path="/data/data/"+getPackageName()+"/sample.db";
         db= SQLiteDatabase.openOrCreateDatabase(path,null);
 
         Spinner spinner = (Spinner) findViewById(R.id.repeat_spinner);
@@ -58,61 +57,45 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
 
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
-
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
                 String selectedItemText = (String) parent.getItemAtPosition(position);
                 // Notify the selected item text
                 Toast.makeText
                         (getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT)
                         .show();
                 repeatText = selectedItemText;
-
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
 
             public String getRepeatText() {
-
                 return repeatText;
-
             }
-
         });
-
 
         txtEventName=(EditText)findViewById(R.id.txtEventName);
         txtMessage=(EditText)findViewById(R.id.addMessage);
-
         btnDatePicker=(Button)findViewById(R.id.btnStartDate);
         btnTimePicker=(Button)findViewById(R.id.btnStartTime);
         txtDate=(EditText)findViewById(R.id.txtStartDate);
         txtTime=(EditText)findViewById(R.id.txtStartTime);
-
         btnDatePicker.setOnClickListener(this);
         btnTimePicker.setOnClickListener(this);
 
         notifyOnSend=(Switch)findViewById(R.id.swNotifySent);
         btnSubmit=(Button)findViewById(R.id.btnSubmit);
-
         Submit();
-
     }
 
     @Override
     public void onClick(View v) {
-
         if(v == txtEventName){
-
             eventName = txtEventName.getText().toString();
-
         }
-
 
         if (v == btnDatePicker) {
 
@@ -128,17 +111,13 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                         @Override
                         public void onDateSet(DatePicker view, int year,
                                               int monthOfYear, int dayOfMonth) {
-
                             txtDate.setText((monthOfYear + 1) + "-" + dayOfMonth + "-" + year);
-
                         }
                     }, mYear, mMonth, mDay);
             datePickerDialog.show();
         }
 
-
         if (v == btnTimePicker) {
-
             // Get Current Time
             final Calendar c = Calendar.getInstance();
             mHour = c.get(Calendar.HOUR_OF_DAY);
@@ -151,7 +130,6 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                         @Override
                         public void onTimeSet(TimePicker view, int hourOfDay,
                                               int minute) {
-
                             txtTime.setText(hourOfDay + ":" + minute);
                         }
                     }, mHour, mMinute, false);
@@ -159,17 +137,12 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
         }
 
         if (v == notifyOnSend){
-
             if (notifyOn == false){
-
                 notifyOn = true;
-
             }
 
             else{
-
                 notifyOn = false;
-
             }
 
         }
@@ -189,15 +162,20 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                 message = txtMessage.getText().toString();
                 date = txtDate.getText().toString();
                 time = txtTime.getText().toString();
+                dayOfWeek = (mDay + mMonth + mYear + (mYear/4) +(mYear/100)+1)%7;;
 
                 ContentValues value2= new ContentValues();
-                //Log.d("Tag1", "name: " + name + " message: " + " date : " + startDate + " Time: " + startTime);
+                Log.d("Tag1", "name: " + name + " message: " + " date : " + date + " Time: " + time + " Pattern: " + repeatText + " Day of Week: " + dayOfWeek);
+
                 value2.put("name",name);
                 value2.put("message",message);
                 value2.put("contact","Jeff");
                 value2.put("platform","FB");
                 value2.put("date", date);
                 value2.put("time", time);
+                value2.put("recurrsionPattern", repeatText);
+                value2.put("dayOfWeek", dayOfWeek);
+
 
                 db.insert("info",null,value2);
                 //Log.d("Tag", "1");
