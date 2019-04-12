@@ -1,16 +1,21 @@
 package com.example.autotextapp;
 
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,14 +29,19 @@ import android.view.View.OnClickListener;
 import android.app.ListActivity;
 
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
+
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
     CalendarView mainCalendar;
     TextView selectedDate;
     String date;
@@ -44,6 +54,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                    Manifest.permission.SEND_SMS)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.SEND_SMS},
+                        MY_PERMISSIONS_REQUEST_SEND_SMS);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            // Permission has already been granted
+        }
 
         String path="/data/data/"+getPackageName()+"/sample.db";
 
@@ -61,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("Tag1", "Test");
                 date = (month + 1) + "-" + dayOfMonth + "-" + year;
 
-
                 dayOfWeek = (dayOfMonth + month + year + (year/4) +(year/100)+1)%7;
                 Log.d("Tag1", "Test");
                 PopulateList(db);
@@ -77,16 +112,55 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView)findViewById(R.id.EventList);
         listView.setAdapter(adapter);
 
-       /* listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, Edit_Event.class);
-                startActivity(intent);
+                //Intent intent = new Intent(MainActivity.this, Edit_Event.class);
+                //startActivity(intent);
+                ListItem itemToDelete = list.get(position);
+                list.remove(itemToDelete);
+
             }
-        });*/
+        });
 
+        new Thread(new Runnable() {
+            public void run() {
+                while(true)
+                {
+                    Calendar todayCal = Calendar.getInstance();
+                    SimpleDateFormat sdf = new SimpleDateFormat("M-d-YYYY");
+                    todayCal.setTimeInMillis(System.currentTimeMillis());
+                    String today = sdf.format(todayCal.getTime());
+                    String path="/data/data/"+getPackageName()+"/sample.db";
+                    db = SQLiteDatabase.openOrCreateDatabase(path, null);
+                    //Log.d("Test", today);
+                    Cursor iter = db.rawQuery("SELECT * FROM  info  WHERE date =" + "'" + today + "'", null);
+                    while (iter.moveToNext()) {
+                        Log.d("Test", iter.getString(5));
+                        Calendar now = Calendar.getInstance();
+                        SimpleDateFormat sdf2 = new SimpleDateFormat("H:mm");
+                        now.setTimeInMillis(System.currentTimeMillis());
+                        String nowStr = sdf2.format(now.getTime());
+                        Log.d("Test", nowStr);
+                        Log.d("Test", iter.getString(5) + " " + nowStr + " " + Boolean.toString(iter.getString(5)==nowStr));
+                        if (iter.getString(5) == nowStr) {
+                            Log.d("Test2", iter.getString(2));
+                            SmsManager smsManager = SmsManager.getDefault();
+                            smsManager.sendTextMessage("+1" + iter.getString(3), null, iter.getString(2), null, null);
 
+                        }
 
+                    }
+                    db.close();
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }).start();
 
 
     }
@@ -118,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         while(iter.moveToNext()){
             ListItem nextItem = new ListItem();
             nextItem.contactName = iter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+            //nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
             nextItem.messageSendDate = iter.getString(5);
             nextItem.sendTime = iter.getString(6);
             nextItem.message = iter.getString(2);
@@ -128,53 +202,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Tag", list.get(0).toString());
 
         }
-        /*while(dailyRecurIter.moveToNext()){
-            ListItem nextItem = new ListItem();
-            nextItem.contactName = dailyRecurIter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = dailyRecurIter.getString(5);
-            nextItem.sendTime = dailyRecurIter.getString(6);
-            nextItem.message = dailyRecurIter.getString(2);
-
-            list.add(nextItem);
-            Log.d("Tag", list.get(0).toString());
-        }
-
-        while(weeklyRecurIter.moveToNext()){
-            ListItem nextItem = new ListItem();
-            nextItem.contactName = weeklyRecurIter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = weeklyRecurIter.getString(5);
-            nextItem.sendTime = weeklyRecurIter.getString(6);
-            nextItem.message = weeklyRecurIter.getString(2);
-
-            list.add(nextItem);
-            Log.d("Tag", list.get(0).toString());
-        }
-
-        while(monthlyRecurIter.moveToNext()){
-            ListItem nextItem = new ListItem();
-            nextItem.contactName = monthlyRecurIter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = monthlyRecurIter.getString(5);
-            nextItem.sendTime = monthlyRecurIter.getString(6);
-            nextItem.message = monthlyRecurIter.getString(2);
-
-            list.add(nextItem);
-            Log.d("Tag", list.get(0).toString());
-        }
-
-        while(yearlyRecurIter.moveToNext()){
-            ListItem nextItem = new ListItem();
-            nextItem.contactName = yearlyRecurIter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = yearlyRecurIter.getString(5);
-            nextItem.sendTime = yearlyRecurIter.getString(6);
-            nextItem.message = yearlyRecurIter.getString(2);
-
-            list.add(nextItem);
-            Log.d("Tag", list.get(0).toString());
-        }*/
 
         adapter = new ListItemAdapter(this, 0, list);
         listView.setAdapter(adapter);
@@ -196,8 +223,6 @@ public class MainActivity extends AppCompatActivity {
             view.setVisibility(View.GONE);
         }
     }
-
-
 
 }
 

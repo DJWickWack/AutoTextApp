@@ -7,6 +7,7 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:orientation="vertical"
+    android:focusable="true"
     android:paddingLeft="10dp"
     android:paddingTop="5dp">
 
@@ -45,15 +46,6 @@
         android:text="Hi! "
         android:textSize="20dp" />
 
-    <Button
-        android:id="@+id/delete_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/message"
-        android:clickable="true"
-        android:paddingRight="10dp"
-        android:text="X"
-        android:visibility="visible" />
 </RelativeLayout>
 
 

@@ -142,7 +142,13 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                         @Override
                         public void onTimeSet(TimePicker view, int hourOfDay,
                                               int minute) {
-                            txtTime.setText(hourOfDay + ":" + minute);
+                            if(minute >= 10) {
+                                txtTime.setText(hourOfDay + ":" + minute);
+                            }
+                            else if( minute<10){
+                                txtTime.setText(hourOfDay+":0" + minute);
+                            }
+
                         }
                     }, mHour, mMinute, false);
             timePickerDialog.show();
