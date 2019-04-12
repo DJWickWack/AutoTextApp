@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final ListItem itemToDelete = (ListItem)listView.getItemAtPosition(position);
-                ToggleView(view);
+                ToggleView(findViewById(R.id.delete_button));
                 Button deleteButton = (Button) findViewById(R.id.delete_button);
                 deleteButton.setOnClickListener(new View.OnClickListener(){
                     public void onClick(View v){
