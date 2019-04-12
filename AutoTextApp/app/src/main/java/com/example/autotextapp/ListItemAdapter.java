@@ -37,8 +37,8 @@ public class ListItemAdapter extends ArrayAdapter<ListItem> {
          //Bitmap messengerIcon;
 
         ImageView messengerIcon;
-        messengerIcon = (ImageView)view.findViewById(R.id.messengerIcon);
-        messengerIcon.setImageBitmap(item.messengerIcon);
+       // messengerIcon = (ImageView)view.findViewById(R.id.messengerIcon);
+       // messengerIcon.setImageBitmap(item.messengerIcon);
 
          //Date messageSendDate;
         TextView messageSendDate;

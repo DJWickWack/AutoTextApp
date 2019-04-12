@@ -1,35 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-    <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingTop="5dp">
+
+    <TextView
+        android:id="@+id/contactName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingTop="5dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/contactName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingRight="10dp"
-            android:textSize="20dp"
-            android:text="Robert" />
-
-        <ImageView
-            android:id="@+id/messengerIcon"
-            android:layout_width="80dip"
-            android:layout_height="80dip"
-            android:layout_toEndOf="@+id/contactName"
-            android:paddingRight="10dp"
-            app:srcCompat="@drawable/default_image" />
+        android:paddingRight="10dp"
+        android:text="Robert"
+        android:textSize="20dp" />
 
     <TextView
         android:id="@+id/messageSendDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/messengerIcon"
+        android:layout_toEndOf="@+id/contactName"
         android:paddingRight="10dp"
         android:text="4/2/2019"
         android:textSize="20dp" />
@@ -51,16 +44,17 @@
         android:paddingRight="10dp"
         android:text="Hi! "
         android:textSize="20dp" />
+
     <Button
         android:id="@+id/delete_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/message"
+        android:clickable="true"
         android:paddingRight="10dp"
         android:text="X"
-        android:visibility="gone"
-        />
-    </RelativeLayout>
+        android:visibility="visible" />
+</RelativeLayout>
 
 
 

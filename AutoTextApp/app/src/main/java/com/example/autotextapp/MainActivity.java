@@ -47,23 +47,9 @@ public class MainActivity extends AppCompatActivity {
 
         String path="/data/data/"+getPackageName()+"/sample.db";
 
-
-
         db= SQLiteDatabase.openOrCreateDatabase(path,null);
-        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,message TEXT, date TEXT, time TEXT, recurrsionPattern TEXT, weekDay int);";
+        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, message TEXT, contact TEXT, date TEXT, time TEXT, recurrsionPattern TEXT);";
         db.execSQL(sql);
-        ContentValues value2= new ContentValues();
-        value2.put("name","test");
-        value2.put("message","hi");
-        value2.put("contact","Jeff");
-        value2.put("platform","FB");
-        value2.put("date", "04-11-2019");
-        value2.put("time", "16:35");
-        value2.put("recurrsionPattern", "Never");
-        value2.put("dayOfWeek", 5);
-
-
-        db.insert("info",null, value2);
 
         db.close();Log.d("Tag1", "Test");
         mainCalendar = (CalendarView) findViewById(R.id.calendarView);
@@ -73,22 +59,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 Log.d("Tag1", "Test");
-                if (month+1 <10){
-                    if (dayOfMonth <10){
-                        date = "0" + (month + 1) + "-0" + dayOfMonth + "-" + year;
-                    }
-                    else {
-                        date = "0" + (month + 1) + "-" + dayOfMonth + "-" + year;
-                    }
-                }
-                else {
-                    if (dayOfMonth <10){
-                        date = (month + 1) + "-0" + dayOfMonth + "-" + year;
-                    }
-                    else {
-                        date = (month + 1) + "-" + dayOfMonth + "-" + year;
-                    }
-                }
+                date = (month + 1) + "-" + dayOfMonth + "-" + year;
+
 
                 dayOfWeek = (dayOfMonth + month + year + (year/4) +(year/100)+1)%7;
                 Log.d("Tag1", "Test");
@@ -99,29 +71,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         //adapter = new ListItemAdapter(this, 0, list);
 
         // Assign ListItemAdapter to ListView
         listView = (ListView)findViewById(R.id.EventList);
         listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+       /* listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final ListItem itemToDelete = (ListItem)listView.getItemAtPosition(position);
-                ToggleView(findViewById(R.id.delete_button));
-                Button deleteButton = (Button) findViewById(R.id.delete_button);
-                deleteButton.setOnClickListener(new View.OnClickListener(){
-                    public void onClick(View v){
-                        DeleteEvent(itemToDelete, v);
-                        adapter.remove(itemToDelete);
-                    }
-                });
-
+                Intent intent = new Intent(MainActivity.this, Edit_Event.class);
+                startActivity(intent);
             }
-        });
+        });*/
 
 
 
@@ -137,22 +99,11 @@ public class MainActivity extends AppCompatActivity {
         return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Daily'", null);
     }
 
-    public Cursor GetReccurringWeeklyEvents(SQLiteDatabase db) {
-        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Weekly' AND weekDay =" + dayOfWeek, null);
-    }
-
-    public Cursor GetReccurringMonthlyEvents(SQLiteDatabase db) {
-        String day = date.substring(3,5);
-        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Monthly'"+ "AND date LIKE" + "'%"+day+"%'", null);
-    }
-
-    public Cursor GetReccurringYearlyEvents(SQLiteDatabase db) {
-        String day = date.substring(0,5);
-        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Yearly'"+ "AND date LIKE" +"'" +day+"%'", null);
-    }
-
     public void PopulateList(SQLiteDatabase db){
+        String path="/data/data/"+getPackageName()+"/sample.db";
+        db= SQLiteDatabase.openOrCreateDatabase(path,null);
         list.clear();
+
         Log.d("Tag1", "Here");
         Cursor iter = GetItemsOnDate(db);
         Log.d("Tag1", "H");
@@ -171,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
             nextItem.messageSendDate = iter.getString(5);
             nextItem.sendTime = iter.getString(6);
             nextItem.message = iter.getString(2);
+            nextItem.id = iter.getInt(0);
 
             list.add(nextItem);
             Log.d("Tag", list.get(0).toString());
@@ -234,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void DeleteEvent(ListItem itemToDelete, View view){
-        db.execSQL(" DELETE FROM info WHERE _ID=" + "'"+itemToDelete.GetID()+"'");
+        db.execSQL(" DELETE FROM info WHERE _ID=" + "'"+itemToDelete.id+"'");
     }
 
     public void ToggleView(View view){

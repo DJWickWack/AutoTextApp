@@ -17,29 +17,17 @@ public class ListItem extends AppCompatActivity {
     public String messageSendDate;
     public String sendTime;
     public String message;
-
-    private int id;
+    public int id;
 
     public ListItem(){
-        SetID();
+
     }
 
 public String toString(){
-    return "Contact Name: " + this.contactName + "Message Send Date: " + this.messageSendDate +
+    return "ID: " + id + "Contact Name: " + this.contactName + "Message Send Date: " + this.messageSendDate +
             "Send Time: " + this.sendTime + "Message: " + this.message;
     }
 
-    private void SetID(){
-        String path="/data/data/"+getPackageName()+"/sample.db";
-        SQLiteDatabase db= SQLiteDatabase.openOrCreateDatabase(path,null);
-        Cursor idCursor = db.rawQuery("SELECT _ID FROM  info  WHERE name =" + "'"+contactName+"'" + "AND message" +
-              "'"+message+"'" + "AND date=" + "'"+messageSendDate+"'" +"AND time=" +  "'"+sendTime+"'", null);
-        id = Integer.parseInt(idCursor.getString(0));
-    }
-
-    public int GetID(){
-        return id;
-    }
 
     public ListItem ReturnThisItem(){
         return this;
