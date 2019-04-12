@@ -1,10 +1,16 @@
 package com.example.autotextapp;
 
+import android.app.AlarmManager;
+import android.content.Context;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,14 +34,17 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
     static String name, contact, message, date, time;
 
     Button btnDatePicker, btnTimePicker, btnSubmit;
-    EditText txtEventName, txtMessage, txtDate, txtTime;
+    EditText txtEventName, txtMessage, txtDate, txtTime, txtNumber;
     Switch notifyOnSend;
     public String repeatText, eventName, platform;
     private int mYear, mMonth, mDay, mHour, mMinute, dayOfWeek;
     public boolean notifyOn = false;
+    Calendar calendar;
 
+    AlarmManagerBroadcastReceiver alarm;
+    private PendingIntent alarmIntent;
 
-     SQLiteDatabase db;
+    SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +87,7 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
         });
 
         txtEventName=(EditText)findViewById(R.id.txtEventName);
+        txtNumber=(EditText)findViewById(R.id.txtNumber);
         txtMessage=(EditText)findViewById(R.id.addMessage);
         btnDatePicker=(Button)findViewById(R.id.btnStartDate);
         btnTimePicker=(Button)findViewById(R.id.btnStartTime);
@@ -89,6 +99,8 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
         notifyOnSend=(Switch)findViewById(R.id.swNotifySent);
         btnSubmit=(Button)findViewById(R.id.btnSubmit);
         Submit();
+
+        alarm = new AlarmManagerBroadcastReceiver();
     }
 
     @Override
@@ -140,15 +152,10 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
             if (notifyOn == false){
                 notifyOn = true;
             }
-
             else{
                 notifyOn = false;
             }
-
         }
-
-
-
     }
 
     public void Submit(){
@@ -158,41 +165,45 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
             public void onClick(View v) {
 
                 name = "Joe";
-                contact = "Tim";
+                contact = txtNumber.getText().toString();
                 message = txtMessage.getText().toString();
                 date = txtDate.getText().toString();
                 time = txtTime.getText().toString();
-                dayOfWeek = (mDay + mMonth + mYear + (mYear/4) +(mYear/100)+1)%7;;
+                dayOfWeek = (mDay + mMonth + mYear + (mYear/4) +(mYear/100)+1)%7;
 
                 ContentValues value2= new ContentValues();
                 Log.d("Tag1", "name: " + name + " message: " + " date : " + date + " Time: " + time + " Pattern: " + repeatText + " Day of Week: " + dayOfWeek);
 
                 value2.put("name",name);
                 value2.put("message",message);
-                value2.put("contact","Jeff");
+                value2.put("contact",contact);
                 value2.put("platform","FB");
                 value2.put("date", date);
                 value2.put("time", time);
                 value2.put("recurrsionPattern", repeatText);
-                value2.put("dayOfWeek", dayOfWeek);
-
 
                 db.insert("info",null,value2);
                 //Log.d("Tag", "1");
-
                 db.close();
+
+                Calendar send = Calendar.getInstance();
+                send.set(mYear, mMonth, mDay, mHour, mMinute);
+                long sendTime = send.getTimeInMillis();
+
+                if(repeatText=="Never"){
+                    Context context = AddEvent.this;
+                    if(alarm != null){
+                        alarm.setOnetimeTimer(context, sendTime, contact, message);
+                    }
+                }
 
                 //Log.d("Tag", "2");
 
                 Intent intent = new Intent(AddEvent.this, MainActivity.class);
                 startActivity(intent);
-
-
             }
         });
-
     }
-
 
 }
 
