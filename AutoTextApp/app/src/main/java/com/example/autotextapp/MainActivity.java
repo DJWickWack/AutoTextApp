@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         db= SQLiteDatabase.openOrCreateDatabase(path,null);
-        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,message TEXT,contact TEXT,platform TEXT, date TEXT, time TEXT, recurrsionPattern TEXT, weekDay int);";
+        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,message TEXT, date TEXT, time TEXT, recurrsionPattern TEXT, weekDay int);";
         db.execSQL(sql);
         ContentValues value2= new ContentValues();
         value2.put("name","test");
@@ -205,5 +205,12 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(MainActivity.this, AddEvent.class);
         startActivity(intent);
     }
+
+    public void DeleteEvent(ListItem itemToDelete){
+        db.execSQL(" DELETE FROM info WHERE _ID=" + "'"+itemToDelete.GetID()+"'");
+    }
+
+
+
 }
 
