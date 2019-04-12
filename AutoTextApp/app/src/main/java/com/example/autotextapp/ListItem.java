@@ -40,4 +40,8 @@ public String toString(){
     public int GetID(){
         return id;
     }
+
+    public ListItem ReturnThisItem(){
+        return this;
+    }
 }

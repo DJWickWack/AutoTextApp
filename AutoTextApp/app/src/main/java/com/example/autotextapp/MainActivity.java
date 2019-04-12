@@ -1,6 +1,7 @@
 package com.example.autotextapp;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -12,11 +13,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.database.sqlite.SQLiteDatabase;
+import android.view.View.OnClickListener;
+import android.app.ListActivity;
 
 import java.sql.Time;
 import java.util.ArrayList;
@@ -95,10 +100,32 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
         //adapter = new ListItemAdapter(this, 0, list);
 
         // Assign ListItemAdapter to ListView
         listView = (ListView)findViewById(R.id.EventList);
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final ListItem itemToDelete = (ListItem)listView.getItemAtPosition(position);
+                ToggleView(view);
+                Button deleteButton = (Button) findViewById(R.id.delete_button);
+                deleteButton.setOnClickListener(new View.OnClickListener(){
+                    public void onClick(View v){
+                        DeleteEvent(itemToDelete, v);
+                        adapter.remove(itemToDelete);
+                    }
+                });
+
+            }
+        });
+
+
+
+
 
     }
 
@@ -206,8 +233,16 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void DeleteEvent(ListItem itemToDelete){
+    public void DeleteEvent(ListItem itemToDelete, View view){
         db.execSQL(" DELETE FROM info WHERE _ID=" + "'"+itemToDelete.GetID()+"'");
+    }
+
+    public void ToggleView(View view){
+        if(view.getVisibility() == View.GONE){
+            view.setVisibility(View.VISIBLE);
+        } else {
+            view.setVisibility(View.GONE);
+        }
     }
 
 
