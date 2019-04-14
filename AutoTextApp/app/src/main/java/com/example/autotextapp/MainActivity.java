@@ -143,17 +143,19 @@ public class MainActivity extends AppCompatActivity {
                         String nowStr = sdf2.format(now.getTime());
                         Log.d("Test", nowStr);
                         Log.d("Test", iter.getString(5) + " " + nowStr + " " + Boolean.toString(iter.getString(5)==nowStr));
-                        if (iter.getString(5) == nowStr) {
+                        if (nowStr.equals(iter.getString(5))) {
+                        //boolean isSent = false;
+                        //if(!isSent){
                             Log.d("Test2", iter.getString(2));
                             SmsManager smsManager = SmsManager.getDefault();
-                            smsManager.sendTextMessage("+1" + iter.getString(3), null, iter.getString(2), null, null);
-
+                            smsManager.sendTextMessage("+1" + iter.getString(3), null, iter.getString(2) , null, null);
+                            //isSent = true;
                         }
 
                     }
                     db.close();
                     try {
-                        sleep(1000);
+                        sleep(60000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
