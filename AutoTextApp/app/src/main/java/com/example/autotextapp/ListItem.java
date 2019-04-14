@@ -32,7 +32,7 @@ public String toString(){
     private void SetID(){
         String path="/data/data/"+getPackageName()+"/sample.db";
         SQLiteDatabase db= SQLiteDatabase.openOrCreateDatabase(path,null);
-        Cursor idCursor = db.rawQuery("SELECT _ID FROM  info  WHERE name =" + "'"+contactName+"'" + "AND message" +
+        Cursor idCursor = db.rawQuery("SELECT _ID FROM  info  WHERE name =" + "'"+contactName+"'" + "AND message=" +
               "'"+message+"'" + "AND date=" + "'"+messageSendDate+"'" +"AND time=" +  "'"+sendTime+"'", null);
         id = Integer.parseInt(idCursor.getString(0));
     }
