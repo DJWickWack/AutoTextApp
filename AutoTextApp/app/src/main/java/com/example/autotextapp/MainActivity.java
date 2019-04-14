@@ -1,16 +1,21 @@
 package com.example.autotextapp;
 
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,14 +29,19 @@ import android.view.View.OnClickListener;
 import android.app.ListActivity;
 
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
+
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
     CalendarView mainCalendar;
     TextView selectedDate;
     String date;
@@ -45,25 +55,37 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                    Manifest.permission.SEND_SMS)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.SEND_SMS},
+                        MY_PERMISSIONS_REQUEST_SEND_SMS);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            // Permission has already been granted
+        }
+
         String path="/data/data/"+getPackageName()+"/sample.db";
 
-
-
         db= SQLiteDatabase.openOrCreateDatabase(path,null);
-        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,message TEXT, date TEXT, time TEXT, recurrsionPattern TEXT, weekDay int);";
+        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, message TEXT, contact TEXT, date TEXT, time TEXT, recurrsionPattern TEXT);";
         db.execSQL(sql);
-        ContentValues value2= new ContentValues();
-        value2.put("name","test");
-        value2.put("message","hi");
-        value2.put("contact","Jeff");
-        value2.put("platform","FB");
-        value2.put("date", "04-11-2019");
-        value2.put("time", "16:35");
-        value2.put("recurrsionPattern", "Never");
-        value2.put("dayOfWeek", 5);
-
-
-        db.insert("info",null, value2);
 
         db.close();Log.d("Tag1", "Test");
         mainCalendar = (CalendarView) findViewById(R.id.calendarView);
@@ -73,22 +95,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 Log.d("Tag1", "Test");
-                if (month+1 <10){
-                    if (dayOfMonth <10){
-                        date = "0" + (month + 1) + "-0" + dayOfMonth + "-" + year;
-                    }
-                    else {
-                        date = "0" + (month + 1) + "-" + dayOfMonth + "-" + year;
-                    }
-                }
-                else {
-                    if (dayOfMonth <10){
-                        date = (month + 1) + "-0" + dayOfMonth + "-" + year;
-                    }
-                    else {
-                        date = (month + 1) + "-" + dayOfMonth + "-" + year;
-                    }
-                }
+                date = (month + 1) + "-" + dayOfMonth + "-" + year;
 
                 dayOfWeek = (dayOfMonth + month + year + (year/4) +(year/100)+1)%7;
                 Log.d("Tag1", "Test");
@@ -99,8 +106,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         //adapter = new ListItemAdapter(this, 0, list);
 
         // Assign ListItemAdapter to ListView
@@ -110,21 +115,52 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final ListItem itemToDelete = (ListItem)listView.getItemAtPosition(position);
-                ToggleView(findViewById(R.id.delete_button));
-                Button deleteButton = (Button) findViewById(R.id.delete_button);
-                deleteButton.setOnClickListener(new View.OnClickListener(){
-                    public void onClick(View v){
-                        DeleteEvent(itemToDelete, v);
-                        adapter.remove(itemToDelete);
-                    }
-                });
+                //Intent intent = new Intent(MainActivity.this, Edit_Event.class);
+                //startActivity(intent);
+                ListItem itemToDelete = list.get(position);
+                list.remove(itemToDelete);
 
             }
         });
 
+        new Thread(new Runnable() {
+            public void run() {
+                while(true)
+                {
+                    Calendar todayCal = Calendar.getInstance();
+                    SimpleDateFormat sdf = new SimpleDateFormat("M-d-YYYY");
+                    todayCal.setTimeInMillis(System.currentTimeMillis());
+                    String today = sdf.format(todayCal.getTime());
+                    String path="/data/data/"+getPackageName()+"/sample.db";
+                    db = SQLiteDatabase.openOrCreateDatabase(path, null);
+                    //Log.d("Test", today);
+                    Cursor iter = db.rawQuery("SELECT * FROM  info  WHERE date =" + "'" + today + "'", null);
+                    while (iter.moveToNext()) {
+                        Log.d("Test", iter.getString(5));
+                        Calendar now = Calendar.getInstance();
+                        SimpleDateFormat sdf2 = new SimpleDateFormat("H:mm");
+                        now.setTimeInMillis(System.currentTimeMillis());
+                        String nowStr = sdf2.format(now.getTime());
+                        Log.d("Test", nowStr);
+                        Log.d("Test", iter.getString(5) + " " + nowStr + " " + Boolean.toString(iter.getString(5)==nowStr));
+                        if (iter.getString(5) == nowStr) {
+                            Log.d("Test2", iter.getString(2));
+                            SmsManager smsManager = SmsManager.getDefault();
+                            smsManager.sendTextMessage("+1" + iter.getString(3), null, iter.getString(2), null, null);
 
+                        }
 
+                    }
+                    db.close();
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }).start();
 
 
     }
@@ -137,22 +173,11 @@ public class MainActivity extends AppCompatActivity {
         return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Daily'", null);
     }
 
-    public Cursor GetReccurringWeeklyEvents(SQLiteDatabase db) {
-        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Weekly' AND weekDay =" + dayOfWeek, null);
-    }
-
-    public Cursor GetReccurringMonthlyEvents(SQLiteDatabase db) {
-        String day = date.substring(3,5);
-        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Monthly'"+ "AND date LIKE" + "'%"+day+"%'", null);
-    }
-
-    public Cursor GetReccurringYearlyEvents(SQLiteDatabase db) {
-        String day = date.substring(0,5);
-        return db.rawQuery("SELECT * FROM info WHERE recurrsionPattern =" + "'Yearly'"+ "AND date LIKE" +"'" +day+"%'", null);
-    }
-
     public void PopulateList(SQLiteDatabase db){
+        String path="/data/data/"+getPackageName()+"/sample.db";
+        db= SQLiteDatabase.openOrCreateDatabase(path,null);
         list.clear();
+
         Log.d("Tag1", "Here");
         Cursor iter = GetItemsOnDate(db);
         Log.d("Tag1", "H");
@@ -167,62 +192,16 @@ public class MainActivity extends AppCompatActivity {
         while(iter.moveToNext()){
             ListItem nextItem = new ListItem();
             nextItem.contactName = iter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+            //nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
             nextItem.messageSendDate = iter.getString(5);
             nextItem.sendTime = iter.getString(6);
             nextItem.message = iter.getString(2);
+            nextItem.id = iter.getInt(0);
 
             list.add(nextItem);
             Log.d("Tag", list.get(0).toString());
 
         }
-        /*while(dailyRecurIter.moveToNext()){
-            ListItem nextItem = new ListItem();
-            nextItem.contactName = dailyRecurIter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = dailyRecurIter.getString(5);
-            nextItem.sendTime = dailyRecurIter.getString(6);
-            nextItem.message = dailyRecurIter.getString(2);
-
-            list.add(nextItem);
-            Log.d("Tag", list.get(0).toString());
-        }
-
-        while(weeklyRecurIter.moveToNext()){
-            ListItem nextItem = new ListItem();
-            nextItem.contactName = weeklyRecurIter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = weeklyRecurIter.getString(5);
-            nextItem.sendTime = weeklyRecurIter.getString(6);
-            nextItem.message = weeklyRecurIter.getString(2);
-
-            list.add(nextItem);
-            Log.d("Tag", list.get(0).toString());
-        }
-
-        while(monthlyRecurIter.moveToNext()){
-            ListItem nextItem = new ListItem();
-            nextItem.contactName = monthlyRecurIter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = monthlyRecurIter.getString(5);
-            nextItem.sendTime = monthlyRecurIter.getString(6);
-            nextItem.message = monthlyRecurIter.getString(2);
-
-            list.add(nextItem);
-            Log.d("Tag", list.get(0).toString());
-        }
-
-        while(yearlyRecurIter.moveToNext()){
-            ListItem nextItem = new ListItem();
-            nextItem.contactName = yearlyRecurIter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = yearlyRecurIter.getString(5);
-            nextItem.sendTime = yearlyRecurIter.getString(6);
-            nextItem.message = yearlyRecurIter.getString(2);
-
-            list.add(nextItem);
-            Log.d("Tag", list.get(0).toString());
-        }*/
 
         adapter = new ListItemAdapter(this, 0, list);
         listView.setAdapter(adapter);
@@ -234,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void DeleteEvent(ListItem itemToDelete, View view){
-        db.execSQL(" DELETE FROM info WHERE _ID=" + "'"+itemToDelete.GetID()+"'");
+        db.execSQL(" DELETE FROM info WHERE _ID=" + "'"+itemToDelete.id+"'");
     }
 
     public void ToggleView(View view){
@@ -244,8 +223,6 @@ public class MainActivity extends AppCompatActivity {
             view.setVisibility(View.GONE);
         }
     }
-
-
 
 }
 

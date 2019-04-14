@@ -17,17 +17,17 @@ public class ListItem extends AppCompatActivity {
     public String messageSendDate;
     public String sendTime;
     public String message;
-
-    private int id;
+    public int id;
 
     public ListItem(){
-        SetID();
+
     }
 
 public String toString(){
-    return "Contact Name: " + this.contactName + "Message Send Date: " + this.messageSendDate +
+    return "ID: " + id + "Contact Name: " + this.contactName + "Message Send Date: " + this.messageSendDate +
             "Send Time: " + this.sendTime + "Message: " + this.message;
     }
+
 
     private void SetID(){
         String path="/data/data/"+getPackageName()+"/sample.db";
@@ -40,6 +40,7 @@ public String toString(){
     public int GetID(){
         return id;
     }
+
 
     public ListItem ReturnThisItem(){
         return this;
