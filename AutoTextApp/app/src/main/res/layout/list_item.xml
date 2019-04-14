@@ -17,7 +17,8 @@
         android:layout_height="wrap_content"
         android:paddingRight="10dp"
         android:text="Robert"
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/messageSendDate"
@@ -26,7 +27,8 @@
         android:layout_toEndOf="@+id/contactName"
         android:paddingRight="10dp"
         android:text="4/2/2019"
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/sendTime"
@@ -35,7 +37,8 @@
         android:layout_toEndOf="@+id/messageSendDate"
         android:paddingRight="10dp"
         android:text="5:00pm"
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/message"
@@ -44,7 +47,8 @@
         android:layout_toEndOf="@+id/sendTime"
         android:paddingRight="10dp"
         android:text="Hi! "
-        android:textSize="20dp" />
+        android:textSize="20dp"
+        android:textColor="@color/white"/>
 
 </RelativeLayout>
 
