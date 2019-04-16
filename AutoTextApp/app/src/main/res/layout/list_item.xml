@@ -9,46 +9,51 @@
     android:orientation="vertical"
     android:focusable="true"
     android:paddingLeft="10dp"
-    android:paddingTop="5dp">
+    android:paddingTop="5dp"
+    android:background="@color/white">
+
 
     <TextView
         android:id="@+id/contactName"
-        android:layout_width="wrap_content"
+        android:layout_width="127dp"
         android:layout_height="wrap_content"
         android:paddingRight="10dp"
         android:text="Robert"
+        android:textAlignment="center"
         android:textSize="20dp"
-        android:textColor="@color/white"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/messageSendDate"
-        android:layout_width="wrap_content"
+        android:layout_width="128dp"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/contactName"
         android:paddingRight="10dp"
         android:text="4/2/2019"
+        android:textAlignment="center"
         android:textSize="20dp"
-        android:textColor="@color/white"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/sendTime"
-        android:layout_width="wrap_content"
+        android:layout_width="105dp"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/messageSendDate"
         android:paddingRight="10dp"
         android:text="5:00pm"
+        android:textAlignment="center"
         android:textSize="20dp"
-        android:textColor="@color/white"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/sendTime"
         android:paddingRight="10dp"
         android:text="Hi! "
         android:textSize="20dp"
-        android:textColor="@color/white"/>
+        android:layout_below="@id/contactName"
+        />
 
 </RelativeLayout>
 

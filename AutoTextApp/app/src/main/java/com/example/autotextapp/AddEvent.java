@@ -96,6 +96,14 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
         btnDatePicker.setOnClickListener(this);
         btnTimePicker.setOnClickListener(this);
 
+        Bundle extras = getIntent().getExtras();
+        if(extras != null && extras.getBoolean("CAMEFROMEDIT")){
+            txtEventName.setText(extras.getString("NAME"));
+            txtDate.setText(extras.getString("SENDDATE"));
+            txtTime.setText(extras.getString("SENDTIME"));
+            txtMessage.setText(extras.getString("MESSAGE"));
+        }
+
         notifyOnSend=(Switch)findViewById(R.id.swNotifySent);
         btnSubmit=(Button)findViewById(R.id.btnSubmit);
         Submit();
@@ -170,7 +178,7 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
             @Override
             public void onClick(View v) {
 
-                name = "Joe";
+                name = eventName;
                 contact = txtNumber.getText().toString();
                 message = txtMessage.getText().toString();
                 date = txtDate.getText().toString();
@@ -205,6 +213,7 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                 //Log.d("Tag", "2");
 
                 Intent intent = new Intent(AddEvent.this, MainActivity.class);
+
                 startActivity(intent);
             }
         });

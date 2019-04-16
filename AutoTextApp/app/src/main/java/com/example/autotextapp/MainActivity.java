@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.database.sqlite.SQLiteDatabase;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     ListItemAdapter adapter;
     ListView listView;
     int dayOfWeek;
+    boolean isEditing = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,8 +119,9 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Intent intent = new Intent(MainActivity.this, Edit_Event.class);
                 //startActivity(intent);
-                ListItem itemToDelete = list.get(position);
-                list.remove(itemToDelete);
+                ListItem itemToEdit = list.get(position);
+                //list.remove(itemToDelete);
+                EditEvent(listView,itemToEdit);
 
             }
         });
@@ -212,6 +215,18 @@ public class MainActivity extends AppCompatActivity {
     public void AddEvent(View view){
         Intent intent = new Intent(MainActivity.this, AddEvent.class);
         startActivity(intent);
+    }
+
+    public void EditEvent(View view, ListItem itemToEdit){
+        isEditing = true;
+        Intent intent = new Intent(MainActivity.this, AddEvent.class);
+        intent.putExtra("NAME", itemToEdit.contactName);
+        intent.putExtra("SENDDATE", itemToEdit.messageSendDate);
+        intent.putExtra("SENDTIME", itemToEdit.sendTime);
+        intent.putExtra("MESSAGE", itemToEdit.message);
+        intent.putExtra("CAMEFROMEDIT", isEditing);
+        startActivity(intent);
+        isEditing = false;
     }
 
     public void DeleteEvent(ListItem itemToDelete, View view){
