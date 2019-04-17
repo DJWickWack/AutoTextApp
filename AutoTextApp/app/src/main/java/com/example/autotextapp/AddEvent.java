@@ -93,6 +93,14 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
         btnDatePicker.setOnClickListener(this);
         btnTimePicker.setOnClickListener(this);
 
+        Bundle extras = getIntent().getExtras();
+        if(extras != null && extras.getBoolean("CAMEFROMEDIT")){
+            txtEventName.setText(extras.getString("NAME"));
+            txtDate.setText(extras.getString("SENDDATE"));
+            txtTime.setText(extras.getString("SENDTIME"));
+            txtMessage.setText(extras.getString("MESSAGE"));
+        }
+
         notifyOnSend=(Switch)findViewById(R.id.swNotifySent);
         btnSubmit=(Button)findViewById(R.id.btnSubmit);
         Submit();
@@ -138,7 +146,13 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                         @Override
                         public void onTimeSet(TimePicker view, int hourOfDay,
                                               int minute) {
-                            txtTime.setText(hourOfDay + ":" + minute);
+                            if(minute >= 10) {
+                                txtTime.setText(hourOfDay + ":" + minute);
+                            }
+                            else if( minute<10){
+                                txtTime.setText(hourOfDay+":0" + minute);
+                            }
+
                         }
                     }, mHour, mMinute, false);
             timePickerDialog.show();
@@ -160,7 +174,7 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
             @Override
             public void onClick(View v) {
 
-                name = "Joe";
+                name = eventName;
                 contact = txtNumber.getText().toString();
                 message = txtMessage.getText().toString();
                 date = txtDate.getText().toString();
@@ -168,18 +182,17 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                 dayOfWeek = (mDay + mMonth + mYear + (mYear/4) +(mYear/100)+1)%7;
 
                 ContentValues value2= new ContentValues();
-                Log.d("Tag1", "name: " + name + " message: " + " date : " + date + " Time: " + time + " Pattern: " + repeatText + " Day of Week: " + dayOfWeek);
+                Log.d("Tag1", "name: " + name + " message: " + " date : " + date + " Time: " + time + " Pattern: " + repeatText +" Number: " + contact);
 
                 value2.put("name",name);
                 value2.put("message",message);
                 value2.put("contact",contact);
-                value2.put("platform","FB");
                 value2.put("date", date);
                 value2.put("time", time);
                 value2.put("recurrsionPattern", repeatText);
 
                 db.insert("info",null,value2);
-                //Log.d("Tag", "1");
+                Log.d("Tag", "1");
                 db.close();
 
                 Calendar sendTime = Calendar.getInstance();
@@ -189,6 +202,7 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                 //Log.d("Tag", "2");
 
                 Intent intent = new Intent(AddEvent.this, MainActivity.class);
+
                 startActivity(intent);
             }
         });
@@ -212,4 +226,5 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
     }
 
 }
+
 

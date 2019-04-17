@@ -1,32 +1,48 @@
 package com.example.autotextapp;
 
 
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.database.sqlite.SQLiteDatabase;
+import android.view.View.OnClickListener;
+import android.app.ListActivity;
 
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
+
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
     CalendarView mainCalendar;
     TextView selectedDate;
     String date;
@@ -35,28 +51,43 @@ public class MainActivity extends AppCompatActivity {
     ListItemAdapter adapter;
     ListView listView;
     int dayOfWeek;
+    boolean isEditing = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                    Manifest.permission.SEND_SMS)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.SEND_SMS},
+                        MY_PERMISSIONS_REQUEST_SEND_SMS);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            // Permission has already been granted
+        }
+
         String path="/data/data/"+getPackageName()+"/sample.db";
 
-
-
         db= SQLiteDatabase.openOrCreateDatabase(path,null);
-        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT,message TEXT,contact TEXT,platform TEXT, date TEXT, time TEXT, recurrsionPattern TEXT);";
+        String sql = "CREATE TABLE IF NOT EXISTS info"+"(_ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, message TEXT, contact TEXT, date TEXT, time TEXT, recurrsionPattern TEXT);";
         db.execSQL(sql);
-        ContentValues value2= new ContentValues();
-        value2.put("name","test");
-        value2.put("message","hi");
-        value2.put("contact","Jeff");
-        value2.put("platform","FB");
-        value2.put("date", "04-11-2019");
-        value2.put("time", "16:35");
-        value2.put("recurrsionPattern", "Never");
-
-        db.insert("info",null, value2);
 
         db.close();Log.d("Tag1", "Test");
         mainCalendar = (CalendarView) findViewById(R.id.calendarView);
@@ -66,10 +97,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 Log.d("Tag1", "Test");
-
                 date = (month + 1) + "-" + dayOfMonth + "-" + year;
 
-                //dayOfWeek = (dayOfMonth + month + year + (year/4) +(year/100)+1)%7;
+                dayOfWeek = (dayOfMonth + month + year + (year/4) +(year/100)+1)%7;
                 Log.d("Tag1", "Test");
                 PopulateList(db);
                 Log.d("Tag1", "Test");
@@ -78,16 +108,69 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         //adapter = new ListItemAdapter(this, 0, list);
 
         // Assign ListItemAdapter to ListView
         listView = (ListView)findViewById(R.id.EventList);
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Intent intent = new Intent(MainActivity.this, Edit_Event.class);
+                //startActivity(intent);
+                ListItem itemToEdit = list.get(position);
+                //list.remove(itemToDelete);
+                EditEvent(listView,itemToEdit);
+
+            }
+        });
+
+        new Thread(new Runnable() {
+            public void run() {
+                while(true)
+                {
+                    Calendar todayCal = Calendar.getInstance();
+                    SimpleDateFormat sdf = new SimpleDateFormat("M-d-YYYY");
+                    todayCal.setTimeInMillis(System.currentTimeMillis());
+                    String today = sdf.format(todayCal.getTime());
+                    String path="/data/data/"+getPackageName()+"/sample.db";
+                    db = SQLiteDatabase.openOrCreateDatabase(path, null);
+                    //Log.d("Test", today);
+                    Cursor iter = db.rawQuery("SELECT * FROM  info  WHERE date =" + "'" + today + "'", null);
+                    while (iter.moveToNext()) {
+                        Log.d("Test", iter.getString(5));
+                        Calendar now = Calendar.getInstance();
+                        SimpleDateFormat sdf2 = new SimpleDateFormat("H:mm");
+                        now.setTimeInMillis(System.currentTimeMillis());
+                        String nowStr = sdf2.format(now.getTime());
+                        Log.d("Test", nowStr);
+                        Log.d("Test", iter.getString(5) + " " + nowStr + " " + Boolean.toString(iter.getString(5)==nowStr));
+                        if (nowStr.equals(iter.getString(5))) {
+                        //boolean isSent = false;
+                        //if(!isSent){
+                            Log.d("Test2", iter.getString(2));
+                            SmsManager smsManager = SmsManager.getDefault();
+                            smsManager.sendTextMessage("+1" + iter.getString(3), null, iter.getString(2) , null, null);
+                            //isSent = true;
+                        }
+
+                    }
+                    db.close();
+                    try {
+                        sleep(60000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }).start();
+
 
     }
 
     public Cursor GetItemsOnDate(SQLiteDatabase db){
-        Log.d("Tag", "test");
         return db.rawQuery("SELECT * FROM  info  WHERE date =" + "'"+date+"'", null);
     }
 
@@ -96,45 +179,67 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void PopulateList(SQLiteDatabase db){
-        list.clear();
         String path="/data/data/"+getPackageName()+"/sample.db";
         db= SQLiteDatabase.openOrCreateDatabase(path,null);
+        list.clear();
+
         Log.d("Tag1", "Here");
         Cursor iter = GetItemsOnDate(db);
         Log.d("Tag1", "H");
-        Cursor dailyRecurIter = GetReccurringDailyEvents(db);
+        /*Cursor dailyRecurIter = GetReccurringDailyEvents(db);
         Log.d("Tag1", "E");
-
+        Cursor weeklyRecurIter = GetReccurringWeeklyEvents(db);
+        Log.d("Tag1", "R");
+        Cursor monthlyRecurIter = GetReccurringMonthlyEvents(db);
+        Log.d("Tag1", "E");
+        Cursor yearlyRecurIter = GetReccurringYearlyEvents(db);
+        Log.d("Tag1", "Q");*/
         while(iter.moveToNext()){
             ListItem nextItem = new ListItem();
             nextItem.contactName = iter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
+            //nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
             nextItem.messageSendDate = iter.getString(5);
             nextItem.sendTime = iter.getString(6);
             nextItem.message = iter.getString(2);
+            nextItem.id = iter.getInt(0);
+
             list.add(nextItem);
             Log.d("Tag", list.get(0).toString());
 
-        }
-        while(dailyRecurIter.moveToNext()){
-            ListItem nextItem = new ListItem();
-            nextItem.contactName = dailyRecurIter.getString(3);
-            nextItem.messengerIcon = BitmapFactory.decodeResource(getResources(), R.drawable.default_image);
-            nextItem.messageSendDate = dailyRecurIter.getString(5);
-            nextItem.sendTime = dailyRecurIter.getString(6);
-            nextItem.message = dailyRecurIter.getString(2);
-            list.add(nextItem);
-            Log.d("Tag", list.get(0).toString());
         }
 
         adapter = new ListItemAdapter(this, 0, list);
         listView.setAdapter(adapter);
-        db.close();
     }
 
     public void AddEvent(View view){
         Intent intent = new Intent(MainActivity.this, AddEvent.class);
         startActivity(intent);
     }
+
+    public void EditEvent(View view, ListItem itemToEdit){
+        isEditing = true;
+        Intent intent = new Intent(MainActivity.this, AddEvent.class);
+        intent.putExtra("NAME", itemToEdit.contactName);
+        intent.putExtra("SENDDATE", itemToEdit.messageSendDate);
+        intent.putExtra("SENDTIME", itemToEdit.sendTime);
+        intent.putExtra("MESSAGE", itemToEdit.message);
+        intent.putExtra("CAMEFROMEDIT", isEditing);
+        startActivity(intent);
+        isEditing = false;
+    }
+
+    public void DeleteEvent(ListItem itemToDelete, View view){
+        db.execSQL(" DELETE FROM info WHERE _ID=" + "'"+itemToDelete.id+"'");
+    }
+
+    public void ToggleView(View view){
+        if(view.getVisibility() == View.GONE){
+            view.setVisibility(View.VISIBLE);
+        } else {
+            view.setVisibility(View.GONE);
+        }
+    }
+
 }
 
