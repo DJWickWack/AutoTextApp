@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.View.OnClickListener;
 import android.app.ListActivity;
+import android.widget.Toast;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
@@ -121,10 +122,13 @@ public class MainActivity extends AppCompatActivity {
                 //startActivity(intent);
                 ListItem itemToEdit = list.get(position);
                 //list.remove(itemToDelete);
-                EditEvent(listView,itemToEdit);
+                Toast.makeText(MainActivity.this, "Clicked", Toast.LENGTH_SHORT).show();
+                EditEvent(view,itemToEdit);
 
             }
         });
+
+
 
         new Thread(new Runnable() {
             public void run() {
