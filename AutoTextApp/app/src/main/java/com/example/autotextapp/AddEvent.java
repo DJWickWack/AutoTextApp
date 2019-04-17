@@ -41,9 +41,6 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
     public boolean notifyOn = false;
     Calendar calendar;
 
-    AlarmManagerBroadcastReceiver alarm;
-    private PendingIntent alarmIntent;
-
     SQLiteDatabase db;
 
     @Override
@@ -100,7 +97,6 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
         btnSubmit=(Button)findViewById(R.id.btnSubmit);
         Submit();
 
-        alarm = new AlarmManagerBroadcastReceiver();
     }
 
     @Override
@@ -186,16 +182,9 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                 //Log.d("Tag", "1");
                 db.close();
 
-                Calendar send = Calendar.getInstance();
-                send.set(mYear, mMonth, mDay, mHour, mMinute);
-                long sendTime = send.getTimeInMillis();
-
-                if(repeatText=="Never"){
-                    Context context = AddEvent.this;
-                    if(alarm != null){
-                        alarm.setOnetimeTimer(context, sendTime, contact, message);
-                    }
-                }
+                Calendar sendTime = Calendar.getInstance();
+                sendTime.set(mYear, mMonth, mDay,mHour,mMinute);
+                startAlert(contact, message, sendTime, repeatText);
 
                 //Log.d("Tag", "2");
 
@@ -203,6 +192,23 @@ public class AddEvent extends AppCompatActivity implements View.OnClickListener 
                 startActivity(intent);
             }
         });
+    }
+
+    public void startAlert(String number, String message, Calendar sendTime, String repeating){
+        Intent intent = new Intent(this, MyBroadcastReceiver.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("number",number);
+        intent.putExtras(bundle);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this.getApplicationContext(), 234324243, intent, 0);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        if(repeating.equals("Daily")){
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, sendTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        }
+        else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, sendTime.getTimeInMillis(), pendingIntent);
+        }
     }
 
 }
